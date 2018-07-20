@@ -88,15 +88,11 @@ class MainViewController: UIViewController {
   }
 
   func update(response: RecordingsResult) {
-    if let recordings = response.recordings, !recordings.isEmpty {
-      tableView.tableFooterView = nil
-    } else if let error = response.error {
+    if let error = response.error {
       state = .error(error)
       setFooterView()
       tableView.reloadData()
       return
-    } else {
-      tableView.tableFooterView = emptyView
     }
     
     recordings = response.recordings
