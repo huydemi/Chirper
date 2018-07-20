@@ -33,6 +33,15 @@ enum State {
   case populated([Recording])
   case empty
   case error(Error)
+  
+  var currentRecordings: [Recording] {
+    switch self {
+    case .populated(let recordings):
+      return recordings
+    default:
+      return []
+    }
+  }
 }
 
 class MainViewController: UIViewController {
@@ -47,7 +56,6 @@ class MainViewController: UIViewController {
   let searchController = UISearchController(searchResultsController: nil)
   let networkingService = NetworkingService()
   let darkGreen = UIColor(red: 11/255, green: 86/255, blue: 14/255, alpha: 1)
-  var recordings: [Recording]?
   
   var state = State.loading
   
@@ -178,7 +186,7 @@ extension MainViewController: UITableViewDataSource {
   
   func tableView(_ tableView: UITableView,
                  numberOfRowsInSection section: Int) -> Int {
-    return recordings?.count ?? 0
+    return state.currentRecordings.count
   }
   
   func tableView(_ tableView: UITableView,
@@ -190,9 +198,7 @@ extension MainViewController: UITableViewDataSource {
         return UITableViewCell()
     }
     
-    if let recordings = recordings {
-      cell.load(recording: recordings[indexPath.row])
-    }
+    cell.load(recording: state.currentRecordings[indexPath.row])
     
     return cell
   }
