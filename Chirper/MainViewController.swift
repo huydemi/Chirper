@@ -49,7 +49,6 @@ class MainViewController: UIViewController {
   let darkGreen = UIColor(red: 11/255, green: 86/255, blue: 14/255, alpha: 1)
   var recordings: [Recording]?
   var error: Error?
-  var isLoading = false
   
   var state = State.loading
   
@@ -71,8 +70,9 @@ class MainViewController: UIViewController {
   // MARK: - Loading recordings
   
   @objc func loadRecordings() {
-    isLoading = true
-    tableView.tableFooterView = loadingView
+    state = .loading
+    setFooterView()
+    
     recordings = []
     tableView.reloadData()
     
@@ -84,7 +84,6 @@ class MainViewController: UIViewController {
       }
       
       self.searchController.searchBar.endEditing(true)
-      self.isLoading = false
       self.update(response: response)
     }
   }
@@ -137,6 +136,15 @@ class MainViewController: UIViewController {
     
     let nib = UINib(nibName: BirdSoundTableViewCell.NibName, bundle: .main)
     tableView.register(nib, forCellReuseIdentifier: BirdSoundTableViewCell.ReuseIdentifier)
+  }
+  
+  func setFooterView() {
+    switch state {
+    case .loading:
+      tableView.tableFooterView = loadingView
+    default:
+      break
+    }
   }
   
 }
