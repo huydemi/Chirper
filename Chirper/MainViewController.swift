@@ -48,7 +48,6 @@ class MainViewController: UIViewController {
   let networkingService = NetworkingService()
   let darkGreen = UIColor(red: 11/255, green: 86/255, blue: 14/255, alpha: 1)
   var recordings: [Recording]?
-  var error: Error?
   
   var state = State.loading
   
@@ -92,8 +91,8 @@ class MainViewController: UIViewController {
     if let recordings = response.recordings, !recordings.isEmpty {
       tableView.tableFooterView = nil
     } else if let error = response.error {
-      errorLabel.text = error.localizedDescription
-      tableView.tableFooterView = errorView
+      state = .error(error)
+      setFooterView()
       tableView.reloadData()
       return
     } else {
@@ -101,7 +100,6 @@ class MainViewController: UIViewController {
     }
     
     recordings = response.recordings
-    error = response.error
     tableView.reloadData()
   }
   
@@ -142,6 +140,9 @@ class MainViewController: UIViewController {
     switch state {
     case .loading:
       tableView.tableFooterView = loadingView
+    case .error(let error):
+      errorLabel.text = error.localizedDescription
+      tableView.tableFooterView = errorView
     default:
       break
     }
