@@ -33,10 +33,13 @@ enum State {
   case populated([Recording])
   case empty
   case error(Error)
+  case paging([Recording], next: Int)
   
   var currentRecordings: [Recording] {
     switch self {
     case .populated(let recordings):
+      return recordings
+    case .paging(let recordings, _):
       return recordings
     default:
       return []
@@ -57,7 +60,12 @@ class MainViewController: UIViewController {
   let networkingService = NetworkingService()
   let darkGreen = UIColor(red: 11/255, green: 86/255, blue: 14/255, alpha: 1)
   
-  var state = State.loading
+  var state = State.loading {
+    didSet {
+      setFooterView()
+      tableView.reloadData()
+    }
+  }
   
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -78,10 +86,6 @@ class MainViewController: UIViewController {
   
   @objc func loadRecordings() {
     state = .loading
-    setFooterView()
-    
-    recordings = []
-    tableView.reloadData()
     
     let query = searchController.searchBar.text
     networkingService.fetchRecordings(matching: query, page: 1) { [weak self] response in
@@ -98,21 +102,19 @@ class MainViewController: UIViewController {
   func update(response: RecordingsResult) {
     if let error = response.error {
       state = .error(error)
-      setFooterView()
-      tableView.reloadData()
       return
     }
     
     guard let newRecordings = response.recordings, !newRecordings.isEmpty else {
       state = .empty
-      setFooterView()
-      tableView.reloadData()
       return
     }
     
-    state = .populated(newRecordings)
-    setFooterView()
-    tableView.reloadData()
+    if response.hasMorePages {
+      state = .paging(newRecordings, next: response.nextPage)
+    } else {
+      state = .populated(newRecordings)
+    }
   }
   
   // MARK: - View Configuration
@@ -159,6 +161,8 @@ class MainViewController: UIViewController {
       tableView.tableFooterView = emptyView
     case .populated:
       tableView.tableFooterView = nil
+    case .paging:
+      tableView.tableFooterView = loadingView
     }
   }
   
