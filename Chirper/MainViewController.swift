@@ -147,8 +147,10 @@ class MainViewController: UIViewController {
     case .error(let error):
       errorLabel.text = error.localizedDescription
       tableView.tableFooterView = errorView
-    default:
-      break
+    case .empty:
+      tableView.tableFooterView = emptyView
+    case .populated:
+      tableView.tableFooterView = nil
     }
   }
   
