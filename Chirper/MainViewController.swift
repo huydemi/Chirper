@@ -28,6 +28,13 @@
 
 import UIKit
 
+enum State {
+  case loading
+  case populated([Recording])
+  case empty
+  case error(Error)
+}
+
 class MainViewController: UIViewController {
   
   @IBOutlet weak var tableView: UITableView!
@@ -43,6 +50,8 @@ class MainViewController: UIViewController {
   var recordings: [Recording]?
   var error: Error?
   var isLoading = false
+  
+  var state = State.loading
   
   override func viewDidLoad() {
     super.viewDidLoad()
