@@ -95,7 +95,15 @@ class MainViewController: UIViewController {
       return
     }
     
-    recordings = response.recordings
+    guard let newRecordings = response.recordings, !newRecordings.isEmpty else {
+      state = .empty
+      setFooterView()
+      tableView.reloadData()
+      return
+    }
+    
+    state = .populated(newRecordings)
+    setFooterView()
     tableView.reloadData()
   }
   
